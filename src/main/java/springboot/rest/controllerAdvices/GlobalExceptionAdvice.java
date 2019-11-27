@@ -10,7 +10,6 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.Date;
 
 public class GlobalExceptionAdvice {
-
     @Data
     public class ErrorDetails {
         private Date timestamp;

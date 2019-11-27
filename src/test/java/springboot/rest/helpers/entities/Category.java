@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -21,4 +22,5 @@ public class Category {
 
     @OneToMany(mappedBy="category")
     List<Movie> movies = new ArrayList<>();
+
 }

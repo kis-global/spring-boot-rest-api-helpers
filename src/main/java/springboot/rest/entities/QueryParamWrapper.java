@@ -14,5 +14,4 @@ public class QueryParamWrapper {
     private final JSONArray filterOr;
     private final JSONArray range;
     private final JSONArray sort;
-
 }

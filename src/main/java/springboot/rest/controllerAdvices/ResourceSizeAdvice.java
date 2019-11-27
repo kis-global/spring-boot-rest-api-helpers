@@ -9,6 +9,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+@ControllerAdvice
 public class ResourceSizeAdvice implements ResponseBodyAdvice<Page<?>> {
 
     @Override
@@ -20,7 +21,7 @@ public class ResourceSizeAdvice implements ResponseBodyAdvice<Page<?>> {
 
     @Override
     public Page<?> beforeBodyWrite(Page<?> page, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
-        serverHttpResponse.getHeaders().add("X-Total-Count",String.valueOf(page.getTotalElements()));
+        serverHttpResponse.getHeaders().add("X-Total-Count", String.valueOf(page.getTotalElements()));
         return page;
     }
 

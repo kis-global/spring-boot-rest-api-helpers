@@ -12,9 +12,6 @@ import java.net.URLDecoder;
 public class QueryParamExtractor {
 
     public static QueryParamWrapper extract(String filterStr, String rangeStr, String sortStr) {
-
-
-
         Object filterJsonOrArray;
         if (StringUtils.isBlank(filterStr)) {
             filterStr = "{}";
@@ -51,7 +48,7 @@ public class QueryParamExtractor {
         }
         sort = JSON.toJsonArray(sortStr);
 
-
         return new QueryParamWrapper(filter, filterOr, range, sort);
     }
+
 }

@@ -21,9 +21,9 @@ public class IdWrapperSerializer extends StdSerializer<Integer> {
     public void serialize(Integer swe,
                           JsonGenerator jgen,
                           SerializerProvider sp) throws IOException, JsonGenerationException {
-
         jgen.writeStartObject();
         jgen.writeNumberField("id", swe);
         jgen.writeEndObject();
     }
+
 }

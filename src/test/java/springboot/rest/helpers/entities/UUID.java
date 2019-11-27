@@ -12,10 +12,12 @@ import javax.persistence.Id;
 @Setter
 @NoArgsConstructor
 public class UUID {
+
     @Id
     private String uuid;
 
     public UUID(String uuid) {
         this.uuid = uuid;
     }
+
 }

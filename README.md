@@ -67,7 +67,6 @@ public class ActorController {
 }
 ```
 
-
 The main important parts include:
 
 - `@ControllerAdvices` that wrap Collections in objects {content: []) with paging and number of results information along with Status Codes based on Exceptions thrown.
@@ -123,16 +122,8 @@ spring-boot-rest-api-helpers.use-snake-case = false
 - for each of the Rest API resources create an interface `XYZRepository` that extends `BaseRepository<XYZ,KeyType>`
 - for each of the Rest API resources create a class `XYZController` annotated with `@RestController`
 
-for more examples see/run the integration tests
+for more examples see/run the integration tests with `mvn -Dtest=filterByTests test`
 
-## Previous Versions
+## Fully working example
 
-This repo used to be called `react-admin-java-rest` and it was used to provide the needed building blocks for building a real backend API like that can give responses to the above requests in conjuction with react-admin/admin-on-rest (used here together: https://github.com/zifnab87/admin-on-rest-demo-java-rest). Since the time of their first incarnation, it seemed obvious that those API helpers were useful outside of the react-admin REST API realm, so the name `spring-boot-rest-api-helpers` was given.
-
-
-## Fully working example (outdated)
-
-For an example of how it can be used along admin-on-rest there is a fork of [admin-on-rest-demo](https://github.com/marmelab/admin-on-rest-demo)
-that is fully working and uses [react-admin-java-rest](https://github.com/zifnab87/react-admin-java-rest)
-
-Fully Working Fork of admin-on-rest-demo: [react-admin-demo-java-rest](https://github.com/zifnab87/react-admin-demo-java-rest)
+For an example of how it can be used along with admin-on-rest (predecessor of [React Admin](https://marmelab.com/react-admin/)), see [react-admin-demo-java-rest](https://github.com/zifnab87/react-admin-demo-java-rest)

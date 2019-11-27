@@ -15,6 +15,4 @@ public class SpringBootRestTests {
     public void contextLoads() {
     }
 
-
-
 }

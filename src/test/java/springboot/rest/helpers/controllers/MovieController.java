@@ -17,7 +17,6 @@ import java.util.Arrays;
 @RequestMapping("movies")
 public class MovieController {
 
-
     @Autowired
     private MovieRepository repository;
 
@@ -27,9 +26,11 @@ public class MovieController {
     @GetMapping
     public Iterable<Movie> filterBy(
             @RequestParam(required = false, name = "filter") String filterStr,
-            @RequestParam(required = false, name = "range") String rangeStr, @RequestParam(required = false, name="sort") String sortStr) {
+            @RequestParam(required = false, name = "range") String rangeStr,
+            @RequestParam(required = false, name = "sort") String sortStr) {
         QueryParamWrapper wrapper = QueryParamExtractor.extract(filterStr, rangeStr, sortStr);
         return filterService.filterBy(wrapper, repository, Arrays.asList("name"));
     }
+
 }
 

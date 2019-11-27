@@ -57,63 +57,6 @@ public class filterByTests {
     @Autowired
     private UUIDRelationshipController uuidRelationshipController;
 
-
-
-//    @Before
-//    public void before() {
-//        Category action = new Category();
-//        action.setName("action");
-//        categoryRepository.save(action);
-//
-//        Category horror = new Category();
-//        horror.setName("horror");
-//        categoryRepository.save(horror);
-//
-//
-//
-//        Director lana = new Director();
-//        lana.setFirstName("Lana");
-//        lana.setLastName("Wachowski");
-//        directorRepository.save(lana);
-//
-//
-//        Movie matrix = new Movie();
-//        matrix.setName("The Matrix");
-//        matrix.setCategory(action);
-//        matrix.setDirector(lana);
-//        movieRepository.save(matrix);
-//
-//        Director francis = new Director();
-//        francis.setFirstName("Francis");
-//        francis.setLastName("Lawrence");
-//        directorRepository.save(francis);
-//
-//        Movie constantine = new Movie();
-//        constantine.setName("Constantine");
-//        constantine.setCategory(horror);
-//        constantine.setDirector(francis);
-//        movieRepository.save(constantine);
-//
-//        Actor keanu = new Actor();
-//        keanu.setFirstName("Keanu");
-//        keanu.setLastName("Reeves");
-//        keanu.setMovies(Arrays.asList(matrix, constantine));
-//        actorRepository.save(keanu);
-//
-//
-//
-//        Director andy = new Director();
-//        andy.setFirstName("Andy");
-//        andy.setLastName("Muschietti");
-//        directorRepository.save(andy);
-//
-//        Movie it = new Movie();
-//        it.setName("IT");
-//        it.setCategory(horror);
-//        it.setDirector(andy);
-//        movieRepository.save(it);
-//    }
-
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void find_null_primitive_should_return() {
@@ -182,7 +125,6 @@ public class filterByTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void string_range_queries() {
-
         Movie constantine = new Movie();
         constantine.setName("Constantine");
         constantine.setYearReleased(2005);
@@ -193,12 +135,10 @@ public class filterByTests {
         it.setYearReleased(2017);
         movieRepository.save(it);
 
-
         Movie matrix = new Movie();
         matrix.setName("The Matrix");
         matrix.setYearReleased(1999);
         movieRepository.save(matrix);
-
 
         Iterable<Movie> moviesAfterA = movieController.filterBy("{nameGt: A }", null, null);
         Assert.assertEquals(3, IterableUtil.sizeOf(moviesAfterA));
@@ -208,10 +148,7 @@ public class filterByTests {
 
         Iterable<Movie> moviesAfterDBeforeM = movieController.filterBy("{nameGt: D, nameLt:M }", null, null);
         Assert.assertEquals(1, IterableUtil.sizeOf(moviesAfterDBeforeM));
-
     }
-
-
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
@@ -221,12 +158,10 @@ public class filterByTests {
         lana.setLastName("Wachowski");
         directorRepository.save(lana);
 
-
         Movie matrix = new Movie();
         matrix.setName("The Matrix");
         matrix.setDirector(lana);
         movieRepository.save(matrix);
-
 
         Movie constantine = new Movie();
         constantine.setName("Constantine");
@@ -235,7 +170,6 @@ public class filterByTests {
         Movie it = new Movie();
         it.setName("IT");
         movieRepository.save(it);
-
 
         Iterable<Movie> noDirectorMovies = movieController.filterBy("{director: null}", null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(noDirectorMovies));
@@ -249,12 +183,10 @@ public class filterByTests {
         lana.setLastName("Wachowski");
         directorRepository.save(lana);
 
-
         Movie matrix = new Movie();
         matrix.setName("The Matrix");
         matrix.setDirector(lana);
         movieRepository.save(matrix);
-
 
         Movie constantine = new Movie();
         constantine.setName("Constantine");
@@ -294,12 +226,10 @@ public class filterByTests {
         noMovieActor.setLastName("Whatsoever");
         actorRepository.save(noMovieActor);
 
-
         Actor noMovieActor2 = new Actor();
         noMovieActor2.setFirstName("No Movie");
         noMovieActor2.setLastName("Whatsoever 2");
         actorRepository.save(noMovieActor2);
-
 
         Iterable<Actor> noMovieActors = actorController.filterBy("{movies: null}", null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(noMovieActors));
@@ -337,19 +267,14 @@ public class filterByTests {
         noMovieActor.setLastName("Whatsoever");
         actorRepository.save(noMovieActor);
 
-
         Actor noMovieActor2 = new Actor();
         noMovieActor2.setFirstName("No Movie");
         noMovieActor2.setLastName("Whatsoever 2");
         actorRepository.save(noMovieActor2);
 
-
         Iterable<Actor> withMovieActors = actorController.filterBy("{moviesNot: null}", null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(withMovieActors));
     }
-
-
-
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
@@ -383,12 +308,10 @@ public class filterByTests {
         noMovieActor.setLastName("Whatsoever");
         actorRepository.save(noMovieActor);
 
-
         Actor noMovieActor2 = new Actor();
         noMovieActor2.setFirstName("No Movie");
         noMovieActor2.setLastName("Whatsoever 2");
         actorRepository.save(noMovieActor2);
-
 
         Iterable<Actor> matrixAndConstantineActors = actorController.filterBy("{moviesAnd: ["+matrix.getId()+","+constantine.getId()+"]}", null, null);
         Assert.assertEquals(1, IterableUtil.sizeOf(matrixAndConstantineActors));
@@ -414,7 +337,6 @@ public class filterByTests {
         keanu.setLastName("Reeves");
         keanu.setMovies(Arrays.asList(matrix, constantine));
         actorRepository.save(keanu);
-
 
         Iterable<Movie> keanuMovies = movieController.filterBy("{actors: {id: " + keanu.getId()+ "}}", null, null);
         Iterable<Movie> keanuMovies2 = movieController.filterBy("{actors: "+ keanu.getId()+ "}", null, null);
@@ -450,7 +372,6 @@ public class filterByTests {
         jaeden.setLastName("Martell");
         jaeden.setMovies(Arrays.asList(it));
         actorRepository.save(jaeden);
-
 
         Iterable<Movie> moviesByActors = movieController.filterBy("{actors: [" + keanu.getId()+ ", "+ jaeden.getId() +"]}", null, null);
 
@@ -530,7 +451,6 @@ public class filterByTests {
         it.setName("IT");
         movieRepository.save(it);
 
-
         Iterable<Movie> movieById = movieController.filterBy("[{id:"+matrix.getId()+"},{id:"+constantine.getId()+"}]", null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(movieById));
         Iterable<Movie> movieByTwoNames = movieController.filterBy("[{name:"+matrix.getName()+"},{name:"+constantine.getName()+"}]", null, null);
@@ -586,7 +506,6 @@ public class filterByTests {
         Assert.assertEquals(1, IterableUtil.sizeOf(movieByName));
     }
 
-
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void two_level_many_to_many_fetch_movies_with_actor_id() {
@@ -607,8 +526,6 @@ public class filterByTests {
         keanu.setLastName("Reeves");
         keanu.setMovies(Arrays.asList(matrix, constantine));
         actorRepository.save(keanu);
-
-
 
         Iterable<Movie> keanuMovies = movieController.filterBy("{actors: {id:"+keanu.getId()+"}}", null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(keanuMovies));
@@ -694,7 +611,6 @@ public class filterByTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void two_level_many_to_one_fetch_movies_with_director_first_name_exact() {
-
         Director lana = new Director();
         lana.setFirstName("Lana");
         lana.setLastName("Wachowski");
@@ -729,7 +645,6 @@ public class filterByTests {
         Iterable<Movie> lanaMovies = movieController.filterBy("{director: {firstName:Lana}}", null, null);
         Assert.assertEquals(1, IterableUtil.sizeOf(lanaMovies));
     }
-
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
@@ -775,11 +690,9 @@ public class filterByTests {
         Assert.assertEquals(1, IterableUtil.sizeOf(actors));
     }
 
-
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void three_level_fetch_actors_of_movies_with_director_first_name_like() {
-
         Director lana = new Director();
         lana.setFirstName("Lana");
         lana.setLastName("Wachowski");
@@ -820,8 +733,6 @@ public class filterByTests {
         Assert.assertEquals(1, IterableUtil.sizeOf(actors));
     }
 
-
-
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void two_level_many_to_many_fetch_movies_with_actor_having_firstName_and_last_name_in_three_equivalent_ways() {
@@ -853,8 +764,6 @@ public class filterByTests {
         Iterable<Movie> keanuMovies4 = movieController.filterBy("{actorsAnd: [{firstName:SomethingSomething},{lastName: Reeves}]}", null, null);
         Assert.assertEquals(0, IterableUtil.sizeOf(keanuMovies4));
     }
-
-
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
@@ -899,7 +808,6 @@ public class filterByTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void two_level_exact_match_of_primitive__fetch_movie_by_director_name() {
-
         Director lana = new Director();
         lana.setFirstName("Lana");
         lana.setLastName("Wachowski");
@@ -927,7 +835,6 @@ public class filterByTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void  two_level_full_text_search__fetch_movie_like_director_name() {
-
         Director lana = new Director();
         lana.setFirstName("Lana");
         lana.setLastName("Wachowski");
@@ -946,7 +853,6 @@ public class filterByTests {
         Movie constantine = new Movie();
         constantine.setName("Constantine");
         movieRepository.save(constantine);
-
 
         Iterable<Movie> movieByName = movieController.filterBy(encodeURIComponent("{director: {firstName:%an%}}"), null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(movieByName));
@@ -955,7 +861,6 @@ public class filterByTests {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void  two_level__fetch_movie_like_director_name() {
-
         Director lana = new Director();
         lana.setFirstName("Lana");
         lana.setLastName("Wachowski");
@@ -979,11 +884,9 @@ public class filterByTests {
         Assert.assertEquals(2, IterableUtil.sizeOf(movieByName));
     }
 
-
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void  two_level__fetch_movie_with_director_id() {
-
         Director lana = new Director();
         lana.setFirstName("Lana");
         lana.setLastName("Wachowski");
@@ -1205,7 +1108,6 @@ public class filterByTests {
         Assert.assertEquals(2, IterableUtil.sizeOf(moviesByName));
     }
 
-
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void full_text_search_in_all_fields() {
@@ -1245,4 +1147,5 @@ public class filterByTests {
         Iterable<Movie> allMovies2 = movieController.filterBy(null, null, null);
         Assert.assertEquals(3, IterableUtil.sizeOf(allMovies2));
     }
+
 }

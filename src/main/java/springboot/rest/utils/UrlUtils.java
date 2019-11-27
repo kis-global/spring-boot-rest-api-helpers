@@ -9,21 +9,17 @@ public class UrlUtils {
 
     public static String decodeURIComponent(String s)
     {
-        if (s == null)
-        {
+        if (s == null) {
             return null;
         }
 
         String result = null;
 
-        try
-        {
+        try {
             result = URLDecoder.decode(s, "UTF-8");
-        }
-
+        } 
         // This exception should never occur.
-        catch (UnsupportedEncodingException e)
-        {
+        catch (UnsupportedEncodingException e) {
             result = s;
         }
 
@@ -42,8 +38,7 @@ public class UrlUtils {
     {
         String result = null;
 
-        try
-        {
+        try {
             result = URLEncoder.encode(s, "UTF-8")
                     .replaceAll("\\+", "%20")
                     .replaceAll("\\%21", "!")
@@ -52,13 +47,12 @@ public class UrlUtils {
                     .replaceAll("\\%29", ")")
                     .replaceAll("\\%7E", "~");
         }
-
         // This exception should never occur.
-        catch (UnsupportedEncodingException e)
-        {
+        catch (UnsupportedEncodingException e) {
             result = s;
         }
 
         return result;
     }
+
 }

@@ -13,9 +13,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 public class UUIDEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, length = 100, updatable = false)
     @Type(type = "uuid-char")
     protected UUID uuid;
+
 }

@@ -8,6 +8,7 @@ spring:
     password: sa
   flyway:
     enabled: false
+
 logging:
   level:
     org:
@@ -20,5 +21,5 @@ logging:
               BasicBinder:
                 TRACE
 
-server:
-  api-prefix: /api/v1
+#server:
+#  api-prefix: /api/v1

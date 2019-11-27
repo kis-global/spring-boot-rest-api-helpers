@@ -17,7 +17,6 @@ import java.util.Arrays;
 @RequestMapping("directors")
 public class DirectorController {
 
-
     @Autowired
     private DirectorRepository repository;
 
@@ -27,8 +26,10 @@ public class DirectorController {
     @GetMapping
     public Iterable<Director> filterBy(
             @RequestParam(required = false, name = "filter") String filterStr,
-            @RequestParam(required = false, name = "range") String rangeStr, @RequestParam(required = false, name="sort") String sortStr) {
+            @RequestParam(required = false, name = "range") String rangeStr,
+            @RequestParam(required = false, name = "sort") String sortStr) {
         QueryParamWrapper wrapper = QueryParamExtractor.extract(filterStr, rangeStr, sortStr);
         return filterService.filterBy(wrapper, repository, Arrays.asList("firstName", "lastName"));
     }
+
 }

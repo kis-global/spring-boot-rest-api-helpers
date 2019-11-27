@@ -13,6 +13,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 public class UUIDRelationship {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, length = 100, updatable = false)
@@ -22,4 +23,5 @@ public class UUIDRelationship {
     @ManyToOne
     @JoinColumn(name = "uuiduuid", referencedColumnName = "uuid")
     private UUIDEntity uuidEntity;
+
 }

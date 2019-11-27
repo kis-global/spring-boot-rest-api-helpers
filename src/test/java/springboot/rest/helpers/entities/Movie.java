@@ -13,6 +13,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class Movie {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -32,7 +33,5 @@ public class Movie {
 
     @OneToOne(cascade = CascadeType.ALL)
     private UUID uuid;
-
-
 
 }

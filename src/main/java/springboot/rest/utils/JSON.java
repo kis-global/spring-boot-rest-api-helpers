@@ -18,12 +18,10 @@ public class JSON {
         return jsonObj;
     }
 
-
     public static JSONArray toJsonArray(String str) {
         JSONArray jsonArr = new JSONArray(str);
         return jsonArr;
     }
-
 
     public static List toList(JSONArray jsonArray) {
         return IntStream.range(0,jsonArray.length()).mapToObj(i->jsonArray.get(i)).collect(Collectors.toList());
@@ -42,7 +40,7 @@ public class JSON {
         return jsonString;
     }
 
-    public static <T>  T toObject(String jsonString, Class<T> clazz) {
+    public static <T> T toObject(String jsonString, Class<T> clazz) {
         //JSON from String to Object
         ObjectMapper mapper = new ObjectMapper();
         T obj = null;
