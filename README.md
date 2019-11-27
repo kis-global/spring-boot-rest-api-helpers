@@ -126,4 +126,4 @@ for more examples see/run the integration tests with `mvn -Dtest=filterByTests t
 
 ## Fully working example
 
-For an example of how it can be used along with admin-on-rest (predecessor of [React Admin](https://marmelab.com/react-admin/)), see [react-admin-demo-java-rest](https://github.com/zifnab87/react-admin-demo-java-rest)
+For an example of how it can be used along with admin-on-rest (a predecessor of [React Admin](https://marmelab.com/react-admin/)), see [admin-on-rest-demo-java-rest](https://github.com/jdevoo/admin-on-rest-demo-java-rest)
