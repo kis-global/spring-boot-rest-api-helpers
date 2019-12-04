@@ -21,5 +21,3 @@ logging:
               BasicBinder:
                 TRACE
 
-#server:
-#  api-prefix: /api/v1

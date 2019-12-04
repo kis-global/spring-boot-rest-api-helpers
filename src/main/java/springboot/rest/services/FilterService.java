@@ -19,14 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Service
 //from: https://github.com/zifnab87/spring-boot-rest-api-helpers/blob/master/src/main/java/springboot/rest/services/FilterService.java
 public class FilterService<T,I extends Serializable> {
-
-    static final Logger LOG = LoggerFactory.getLogger(FilterService.class);
 
     @Autowired
     private Environment env;
@@ -86,13 +81,9 @@ public class FilterService<T,I extends Serializable> {
         String sortBy = primaryKeyName;
         String order = "DESC";
         JSONObject filter = queryParamWrapper.getFilter();
-        LOG.debug("filter = " + (filter == null ? null : filter.toString()));
         JSONArray filterOr = queryParamWrapper.getFilterOr();
-        LOG.debug("filterOr = " + (filterOr == null ? null : filterOr.toString()));
         JSONArray range = queryParamWrapper.getRange();
-        LOG.debug("range = " + (range == null ? null : range.toString()));
         JSONArray sort = queryParamWrapper.getSort();
-        LOG.debug("sort = " + (sort == null ? null : sort.toString()));
 
         int page = 0;
         int size = Integer.MAX_VALUE;
@@ -104,8 +95,6 @@ public class FilterService<T,I extends Serializable> {
               --size;
             }
         }
-        LOG.debug("page = " + Integer.toString(page));
-        LOG.debug("size " + Integer.toString(size));
 
         if (sort.length() == 2) {
             if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
@@ -127,7 +116,6 @@ public class FilterService<T,I extends Serializable> {
             if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
                 map = convertToCamelCase(map);
             }
-            LOG.debug("map = " + map.toString());
 
             return repo.findAll(specifications.customSpecificationBuilder(map, searchOnlyInFields),
                     PageRequest.of(page, size, sortDir, sortBy));
