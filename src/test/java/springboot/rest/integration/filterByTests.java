@@ -177,6 +177,41 @@ public class filterByTests {
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    public void reference_many_to_one_null__fetch_movies_with_category_having_parent_category() {
+
+        Category fiction = new Category();
+        fiction.setName("fiction");
+        categoryRepository.save(fiction);
+
+        Category horror = new Category();
+        horror.setName("horror");
+        horror.setParentCategory(fiction);
+        categoryRepository.save(horror);
+
+
+        Movie matrix = new Movie();
+        matrix.setName("The Matrix");
+        matrix.setCategory(fiction);
+        movieRepository.save(matrix);
+
+        Movie constantine = new Movie();
+        constantine.setName("Constantine");
+        constantine.setCategory(horror);
+        movieRepository.save(constantine);
+
+        Movie it = new Movie();
+        it.setName("IT");
+        it.setCategory(horror);
+        movieRepository.save(it);
+
+        Iterable<Movie> moviesWithCategoriesThatHaveParentCategoryHorror1 = movieController.filterBy("{category: {parentCategory: {id:"+fiction.getId()+"}}}", null, null);
+        Assert.assertEquals(2, IterableUtil.sizeOf(moviesWithCategoriesThatHaveParentCategoryHorror1));
+        Iterable<Movie> moviesWithCategoriesThatHaveParentCategoryHorror2 = movieController.filterBy("{category: {parentCategory: "+fiction.getId()+"}}", null, null);
+        Assert.assertEquals(2, IterableUtil.sizeOf(moviesWithCategoriesThatHaveParentCategoryHorror2));
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void reference_many_to_one_null__fetch_movies_with_director_not_null() {
         Director lana = new Director();
         lana.setFirstName("Lana");

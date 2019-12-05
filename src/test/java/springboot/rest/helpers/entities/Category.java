@@ -23,4 +23,7 @@ public class Category {
     @OneToMany(mappedBy="category")
     List<Movie> movies = new ArrayList<>();
 
+    @ManyToOne
+    private Category parentCategory;
+
 }

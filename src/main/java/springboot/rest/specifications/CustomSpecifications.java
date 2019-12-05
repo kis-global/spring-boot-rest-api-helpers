@@ -226,6 +226,8 @@ public class CustomSpecifications<T> {
                 return builder.equal(join.get(a.getName()), Enum.valueOf(Class.class.cast(a.getJavaType()), (String) val));
             } else if (isPrimitive(a)) {
                 return builder.equal(join.get(a.getName()), val);
+            } else if (a.isAssociation()) {
+                return builder.equal(join.get(a.getName()), val);
             } else if(isSerializableAndFromString(a)) {
                 try {
                     return builder.equal (join.get(a.getName()), a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
