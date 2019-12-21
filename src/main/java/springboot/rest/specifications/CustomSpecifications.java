@@ -14,7 +14,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-//from: https://github.com/zifnab87/spring-boot-rest-api-helpers/blob/master/src/main/java/springboot/rest/specifications/CustomSpecifications.java
 @Service
 public class CustomSpecifications<T> {
 
@@ -77,7 +76,9 @@ public class CustomSpecifications<T> {
         return predicates;
     }
 
-    public Predicate handleAllCases(CriteriaBuilder builder, Root root, Join join, CriteriaQuery query, Attribute a, String key, Object val) {
+    public Predicate handleAllCases(CriteriaBuilder builder, Root root, Join join, CriteriaQuery query,
+        Attribute a, String key, Object val) {
+
         //boolean isPrimitive = isPrimitive(a);
         boolean isValueCollection = val instanceof Collection;
         boolean isValueMap = val instanceof Map;
@@ -166,7 +167,9 @@ public class CustomSpecifications<T> {
         return key;
     }
 
-    public Predicate searchInAllAttributesPredicate(CriteriaBuilder builder, Root root, String text, List<String> includeOnlyFields) {
+    public Predicate searchInAllAttributesPredicate(CriteriaBuilder builder, Root root, String text,
+        List<String> includeOnlyFields) {
+
         if (!text.contains("%")) {
             text = "%" + text + "%";
         }
@@ -216,7 +219,8 @@ public class CustomSpecifications<T> {
                 return prepareJoinAssociatedPredicate(builder, root, a, val);
             } else if(isSerializableAndFromString(a)) {
                 try {
-                    return builder.equal (root.get(a.getName()), a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
+                    return builder.equal(root.get(a.getName()),
+                                         a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
                 } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     throw new IllegalArgumentException("equality/inequality is currently supported on primitives, enums and serializables with string constructor", e);
                 }
@@ -230,7 +234,8 @@ public class CustomSpecifications<T> {
                 return builder.equal(join.get(a.getName()), val);
             } else if(isSerializableAndFromString(a)) {
                 try {
-                    return builder.equal (join.get(a.getName()), a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
+                    return builder.equal(join.get(a.getName()),
+                                         a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
                 } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     throw new IllegalArgumentException("equality/inequality is currently supported on primitives, enums and serializables with string constructor", e);
                 }

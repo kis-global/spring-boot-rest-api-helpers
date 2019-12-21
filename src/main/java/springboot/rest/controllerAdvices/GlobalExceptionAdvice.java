@@ -1,5 +1,7 @@
 package springboot.rest.controllerAdvices;
 
+import springboot.rest.exceptions.NotFoundException;
+
 import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +34,15 @@ public class GlobalExceptionAdvice {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public final ResponseEntity<ErrorDetails> illegalArgumenttHanlder(Exception ex, WebRequest request) {
+    public final ResponseEntity<ErrorDetails> illegalArgumentHandler(Exception ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
                 request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(NotFoundException.class)
+    public final ResponseEntity<ErrorDetails> notFoundHandler(Exception ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(new Date(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 }

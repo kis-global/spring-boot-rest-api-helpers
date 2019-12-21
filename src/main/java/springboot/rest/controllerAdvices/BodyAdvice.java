@@ -1,5 +1,7 @@
 package springboot.rest.controllerAdvices;
 
+import springboot.rest.exceptions.NotFoundException;
+
 import lombok.NonNull;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +21,9 @@ import java.util.LinkedHashMap;
 import java.lang.reflect.Field;
 
 //https://stackoverflow.com/a/40333275/986160
+//https://stackoverflow.com/a/59294075/986160
 @ControllerAdvice
-public class WrapperAdvice implements ResponseBodyAdvice {
+public class BodyAdvice implements ResponseBodyAdvice {
 
     @Autowired
     Environment env;
@@ -33,6 +36,9 @@ public class WrapperAdvice implements ResponseBodyAdvice {
     @Override
     @SuppressWarnings("unchecked")
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        if (body == null) {
+            throw new NotFoundException("Resource was not found!");
+        }
         String apiPrefix = env.getProperty("spring-boot-rest-api-helpers.api-prefix");
         if (!request.getURI().toString().contains(apiPrefix)) {
             return body;
