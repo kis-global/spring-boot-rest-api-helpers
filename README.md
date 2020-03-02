@@ -27,6 +27,9 @@ Now it is possible to also do the following (after url-encode of the query part 
     GET /actors?filter=[{firstName: Keanu},{firstName: John}] = //actors with firstName  'Keanu' or 'John'
     GET /actors?filter={firstName: [Keanu, John]} = //equivalent to the above
 
+    GET /documents?filter={uuid: f44010c9-4d3c-45b2-bb6b-6cac8572bb78} // get document with java.util.UUID equal to f44010c9-4d3c-45b2-bb6b-6cac8572bb78
+    GET /libraries?filter={documents: {uuid: f44010c9-4d3c-45b2-bb6b-6cac8572bb78}} // get libraries that contain document with uuid equal to f44010c9-4d3c-45b2-bb6b-6cac8572bb78
+    GET /libraries?filter={documents: f44010c9-4d3c-45b2-bb6b-6cac8572bb78} // same as above
 ```
 The key names are not the ones on the database but the ones exposed by the REST API and are the names of the entity attribute names. Here `movies` is plural because an Actor has `@ManyToMany` annotation on `List<Movie> movies` attribute. 
 
@@ -61,7 +64,7 @@ public class ActorController {
             @RequestParam(required = false, name = "range") String rangeStr, 
             @RequestParam(required = false, name="sort") String sortStr) {
 
-        QueryParamWrapper wrapper = QueryParamExtracter.extract(filterStr, rangeStr, sortStr);
+        QueryParamWrapper wrapper = QueryParamExtractor.extract(filterStr, rangeStr, sortStr);
         return filterService.filterBy(wrapper, repository, Arrays.asList("firstName", "lastName"));
     }
 }
@@ -69,7 +72,7 @@ public class ActorController {
 
 The main important parts include:
 
-- `@ControllerAdvices` that wrap Collections in objects {content: []) with paging and number of results information along with Status Codes based on Exceptions thrown and returns 404 in case of null returned from endpoints.
+- `@ControllerAdvices` that wrap Collections in objects {content: []) with paging and number of results information along with Status Codes based on Exceptions thrown and returns 404 in case of null returned from endpoints. Place here additional functionality annotated with @ControllerAdvice and extending the appropriate class depending on your needs.
 - `BaseRepository` interface that needs to be extended by each of resource `Repositories`
 - `CustomSpecifications` does all the magic of Criteria API query generation so that filtering and sorting works along with `FilterService` that provides some helper methods to the Controller code and helps provide convert the String query params to `FilterWrapper` so that it can be injected behind the scenes.
 - `ObjectMapperProvider` that can be used by the Spring Boot Application in case serialization and deserialization need to work through fields instead of Getters and Setters

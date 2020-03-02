@@ -11,7 +11,6 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.Metamodel;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 @Service
@@ -79,12 +78,10 @@ public class CustomSpecifications<T> {
     public Predicate handleAllCases(CriteriaBuilder builder, Root root, Join join, CriteriaQuery query,
         Attribute a, String key, Object val) {
 
-        //boolean isPrimitive = isPrimitive(a);
         boolean isValueCollection = val instanceof Collection;
         boolean isValueMap = val instanceof Map;
         String cleanKey = cleanUpKey(key);
         boolean isKeyClean = cleanKey.equals(key);
-        //boolean isValTextSearch = (val instanceof String) && ((String) val).contains("%");
         boolean isNegation = key.endsWith("Not");
         boolean isGt = key.endsWith("Gt");
         boolean isGte = key.endsWith("Gte");
@@ -94,10 +91,9 @@ public class CustomSpecifications<T> {
         boolean isAssociation = a.isAssociation();
 
         if (isValueMap) {
-            val = convertIdValueToMap(val, a, root);
+            val = convertMapContainingPrimaryIdToValue(val, a, root);
         }
         if (val instanceof Map && isAssociation) {
-            //Root newRoot = query.from(getJavaTypeOfClassContainingAttribute(root, a.getName()));
             List<Predicate> predicates = handleMap(builder, root, root.join(a.getName()), query, ((Map) val), Arrays.asList());
             Predicate[] predicatesArray = predicates.toArray(new Predicate[predicates.size()]);
             return builder.and(predicatesArray);
@@ -144,6 +140,8 @@ public class CustomSpecifications<T> {
             return handleCollection(builder, root, join, query, a, key, (Collection) val, false);
         } else if (isValTextSearch) {
             return createLikePredicate(builder, root, join, a, (String) val);
+        } else if (a.isCollection() && !a.isAssociation()) {
+            return createEqualityPredicate(builder, root, root.join(a.getName()), a, val);
         } else {
             return createEqualityPredicate(builder, root, join, a, val);
         }
@@ -202,43 +200,41 @@ public class CustomSpecifications<T> {
     private Predicate createEqualityPredicate(CriteriaBuilder builder, Root root, Join join, Attribute a, Object val) {
         if (isNull(a, val)) {
             if (a.isAssociation() && a.isCollection()) {
-                return builder.isEmpty(join != null ? join.get(a.getName()) : root.get(a.getName()));
+                return builder.isEmpty(root.get(a.getName()));
             }
             else if(isPrimitive(a)) {
-                return builder.isNull(join != null ? join.get(a.getName()) : root.get(a.getName()));
+                return builder.isNull(root.get(a.getName()));
             }
             else {
-                return join != null ? join.get(a.getName()).isNull() : root.get(a.getName()).isNull();
+                return root.get(a.getName()).isNull();
             }
-        } else if (join == null) {
+        }
+        else if (join == null) {
             if (isEnum(a)) {
                 return builder.equal(root.get(a.getName()), Enum.valueOf(Class.class.cast(a.getJavaType()), (String) val));
             } else if (isPrimitive(a)) {
                 return builder.equal(root.get(a.getName()), val);
-            } else if (a.isAssociation()) {
-                return prepareJoinAssociatedPredicate(builder, root, a, val);
-            } else if(isSerializableAndFromString(a)) {
-                try {
-                    return builder.equal(root.get(a.getName()),
-                                         a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new IllegalArgumentException("equality/inequality is currently supported on primitives, enums and serializables with string constructor", e);
+            } else if(isUUID(a)) {
+                return builder.equal(root.get(a.getName()), UUID.fromString(val.toString()));
+            } else if(a.isAssociation()) {
+                if (isPrimaryKeyOfAttributeUUID(a, root)) {
+                    return prepareJoinAssociatedPredicate(root, a, UUID.fromString(val.toString()));
+                }
+                else {
+                    return prepareJoinAssociatedPredicate(root, a, val);
                 }
             }
-        } else if (join != null) {
+        }
+        else if (join != null) {
             if (isEnum(a)) {
                 return builder.equal(join.get(a.getName()), Enum.valueOf(Class.class.cast(a.getJavaType()), (String) val));
             } else if (isPrimitive(a)) {
                 return builder.equal(join.get(a.getName()), val);
             } else if (a.isAssociation()) {
                 return builder.equal(join.get(a.getName()), val);
-            } else if(isSerializableAndFromString(a)) {
-                try {
-                    return builder.equal(join.get(a.getName()),
-                                         a.getJavaType().getMethod("fromString", String.class).invoke(null, val.toString()));
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new IllegalArgumentException("equality/inequality is currently supported on primitives, enums and serializables with string constructor", e);
-                }
+            }
+            else if(a.isCollection()) {
+                return builder.equal(join, val);
             }
         }
         throw new IllegalArgumentException("equality/inequality is currently supported on primitives and enums");
@@ -288,23 +284,28 @@ public class CustomSpecifications<T> {
         throw new IllegalArgumentException("val type not supported yet for lower-equals");
     }
 
-    private Predicate prepareJoinAssociatedPredicate(CriteriaBuilder builder, Root root, Attribute a, Object val) {
-        Join rootJoinGetName = root.join(a.getName());
+    private Predicate prepareJoinAssociatedPredicate(Root root, Attribute a, Object val) {
+        Path rootJoinGetName = root.join(a.getName());
         Class referencedClass = rootJoinGetName.getJavaType();
-        Attribute referencedPrimaryKey = getIdAttribute(em, referencedClass);
-        return createEqualityPredicate(builder, root, rootJoinGetName, referencedPrimaryKey, val);
+        String referencedPrimaryKey = getIdAttribute(em, referencedClass).getName();
+        return rootJoinGetName.get(referencedPrimaryKey).in(val);
     }
 
     private Class getJavaTypeOfClassContainingAttribute(Root root, String attributeName) {
         Attribute a = root.getModel().getAttribute(attributeName);
         if (a.isAssociation()) {
-            //root.getModel().getAttribute("actors").getName()
             return root.join(a.getName()).getJavaType();
         }
         return null;
     }
 
-    private Object convertIdValueToMap(Object val, Attribute a, Root root) {
+    private boolean isPrimaryKeyOfAttributeUUID(Attribute a, Root root) {
+        Class javaTypeOfAttribute = getJavaTypeOfClassContainingAttribute(root, a.getName());
+        String primaryKeyName = getIdAttribute(em, javaTypeOfAttribute).getJavaType().getSimpleName().toLowerCase();
+        return primaryKeyName.equalsIgnoreCase("uuid");
+    }
+
+    private Object convertMapContainingPrimaryIdToValue(Object val, Attribute a, Root root) {
         Class javaTypeOfAttribute = getJavaTypeOfClassContainingAttribute(root, a.getName());
         String primaryKeyName = getIdAttribute(em, javaTypeOfAttribute).getName();
         if (val instanceof Map && ((Map) val).keySet().size() == 1) {
@@ -318,13 +319,9 @@ public class CustomSpecifications<T> {
         return val;
     }
 
-    private boolean isSerializableAndFromString(Attribute attribute) {
-        try {
-            return Serializable.class.isAssignableFrom(attribute.getJavaType()) &&
-              attribute.getJavaType().getMethod("fromString", String.class) != null;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+    private boolean isUUID(Attribute attribute) {
+        String attributeJavaClass = attribute.getJavaType().getSimpleName().toLowerCase();
+        return attributeJavaClass.equalsIgnoreCase("uuid");
     }
 
     private boolean isPrimitive(Attribute attribute) {

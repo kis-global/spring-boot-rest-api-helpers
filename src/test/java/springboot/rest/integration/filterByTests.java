@@ -14,7 +14,11 @@ import springboot.rest.helpers.entities.*;
 import springboot.rest.helpers.repositories.*;
 
 import static springboot.rest.utils.UrlUtils.encodeURIComponent;
+
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -47,9 +51,6 @@ public class filterByTests {
 
     @Autowired
     private ActorController actorController;
-
-    @Autowired
-    private UuidController uuidController;
 
     @Autowired
     private UUIDEntityController uuidEntityController;
@@ -517,7 +518,6 @@ public class filterByTests {
         it.setName("IT");
         movieRepository.save(it);
 
-
         Iterable<Movie> movieByNotId = movieController.filterBy("{idNot:"+matrix.getId()+"}", null, null);
         Assert.assertEquals(2, IterableUtil.sizeOf(movieByNotId));
     }
@@ -539,6 +539,32 @@ public class filterByTests {
 
         Iterable<Movie> movieByName = movieController.filterBy("{name:"+matrix.getName()+"}", null, null);
         Assert.assertEquals(1, IterableUtil.sizeOf(movieByName));
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    public void exact_match_of_primitive_in_primitive_collection__fetch_movie_by_age_rating() {
+        Movie matrix = new Movie();
+        Set<String> ratings = new HashSet<>();
+        ratings.add("PG-13");
+        matrix.setName("The Matrix");
+        matrix.setAgeRatings(Collections.unmodifiableSet(ratings));
+        movieRepository.save(matrix);
+
+        Movie matrix2 = new Movie();
+        Set<String> ratings2 = new HashSet<>();
+        ratings2.add("R");
+        matrix2.setName("The Matrix Reloaded");
+        matrix2.setAgeRatings(Collections.unmodifiableSet(ratings2));
+        movieRepository.save(matrix2);
+
+        Movie constantine = new Movie();
+        constantine.setName("Constantine");
+        constantine.setAgeRatings(Collections.unmodifiableSet(ratings2));
+        movieRepository.save(constantine);
+
+        Iterable<Movie> movieByAgeRating = movieController.filterBy("{ageRatings: R}", null, null);
+        Assert.assertEquals(2, IterableUtil.sizeOf(movieByAgeRating));
     }
 
     @Test
@@ -1023,48 +1049,42 @@ public class filterByTests {
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-    public void filter_by_primary_key_that_is_not_called_id() {
-        UUID uuid = new UUID("ad2qewqdscasd2e123");
-        uuidRepository.save(uuid);
-
-        Iterable<UUID> uuidsByUuid = uuidController.filterBy("{uuid: ad2qewqdscasd2e123}", null, null);
-        Assert.assertEquals(1, IterableUtil.sizeOf(uuidsByUuid));
-    }
-
-    @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-    public void filter_by_foreign_key_that_is_not_called_id() {
-        Movie matrix = new Movie();
-        matrix.setName("The Matrix");
-        matrix.setUuid(new UUID("ad2qewqdscasd2e123"));
-        movieRepository.save(matrix);
-
-        Iterable<Movie> movieByUuid = movieController.filterBy("{uuid: ad2qewqdscasd2e123}", null, null);
-        Assert.assertEquals(1, IterableUtil.sizeOf(movieByUuid));
-    }
-
-    @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void filter_by_primary_key_that_is_native_uuid() {
-        UUIDEntity entity = new UUIDEntity();
-        uuidEntityRepository.save(entity);
+        UUIDEntity entity1 = new UUIDEntity();
+        uuidEntityRepository.save(entity1);
 
-        Iterable<UUIDEntity> uuidsByUuid = uuidEntityController.filterBy("{uuid: "+entity.getUuid().toString()+"}", null, null);
-        Assert.assertEquals(1, IterableUtil.sizeOf(uuidsByUuid));
+        UUIDEntity entity2 = new UUIDEntity();
+        uuidEntityRepository.save(entity2);
+
+        Iterable<UUIDEntity> entitiesByUuid = uuidEntityController.filterBy("{uuid: "+entity1.getUuid()+"}", null, null);
+        Assert.assertEquals(1, IterableUtil.sizeOf(entitiesByUuid));
     }
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void filter_by_foreign_key_that_is_native_uuid() {
-        UUIDEntity entity = new UUIDEntity();
-        uuidEntityRepository.save(entity);
+        UUIDEntity entity1 = new UUIDEntity();
+        uuidEntityRepository.save(entity1);
 
-        UUIDRelationship relationship = new UUIDRelationship();
-        relationship.setUuidEntity(entity);
-        uuidRelationshipRepository.save(relationship);
+        UUIDEntity entity2 = new UUIDEntity();
+        uuidEntityRepository.save(entity2);
 
-        Iterable<UUIDRelationship> uuidsByUuid = uuidRelationshipController.filterBy("{uuidEntity: "+entity.getUuid().toString()+"}", null, null);
-        Assert.assertEquals(1, IterableUtil.sizeOf(uuidsByUuid));
+        UUIDRelationship relationship1 = new UUIDRelationship();
+        relationship1.setUuidEntity(entity1);
+        uuidRelationshipRepository.save(relationship1);
+
+        UUIDRelationship relationship2 = new UUIDRelationship();
+        relationship2.setUuidEntity(entity1);
+        uuidRelationshipRepository.save(relationship2);
+
+        UUIDRelationship relationship3 = new UUIDRelationship();
+        relationship3.setUuidEntity(entity2);
+        uuidRelationshipRepository.save(relationship3);
+
+        Iterable<UUIDRelationship> relsByUuid = uuidRelationshipController.filterBy("{uuidEntity:" + entity1.getUuid()+" }", null, null);
+        Iterable<UUIDRelationship> relsByUuid2 = uuidRelationshipController.filterBy("{uuidEntity: {uuid: " + entity1.getUuid()+" }}", null, null);
+        Assert.assertEquals(2, IterableUtil.sizeOf(relsByUuid));
+        Assert.assertEquals(2, IterableUtil.sizeOf(relsByUuid2));
     }
 
     @Test
@@ -1088,7 +1108,7 @@ public class filterByTests {
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-    public void search_text_on_primitive__fetch_movie_by_not_oontaining_name_infix() {
+    public void search_text_on_primitive__fetch_movie_by_not_containing_name_infix() {
         Movie matrix = new Movie();
         matrix.setName("The Matrix");
         movieRepository.save(matrix);
