@@ -857,7 +857,6 @@ public class filterByTests {
         noMovieActor2.setLastName("Whatsoever 2");
         actorRepository.save(noMovieActor2);
 
-
         Iterable<Actor> actors = actorController.filterBy(encodeURIComponent("{movies: [{name:%atr%},{name:%onest%}]}}"), null, null);
         Assert.assertEquals(1, IterableUtil.sizeOf(actors));
         Iterable<Actor> actors2 = actorController.filterBy(encodeURIComponent("{moviesAnd: [{name:%atr%},{name:%onst%}]}}"), null, null);

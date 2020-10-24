@@ -3,33 +3,34 @@
 Inspired by built-in fake REST data provider [react-admin](https://github.com/marmelab/react-admin/tree/master/packages/ra-data-fakerest) with queries like:
 ```    
     GET /movies?filter={id: 1} //get movies by id = 1
-    GET /movies?filter={id: [1,2]} // get movies by id = 1 or id = 2
-    GET /actors?filter={movies: 1, firstName: John} = //actors played in movie with id = 1 and their first  name is John
-    GET /actors?filter={birthDateGt: 1960}&sort=[id,DESC]&range=[0,100] // actors born later than 1960
-    GET /actors?filter={q: %Keanu Re%} // full text search on all text fields
+    GET /movies?filter={id: [1,2]} //get movies by id = 1 or id = 2
+    GET /actors?filter={movies: 1, firstName: John} //actors played in movie with id = 1 and their first  name is John
+    GET /actors?filter={birthDateGt: 1960}&sort=[id,DESC]&range=[0,100] //actors born later than 1960
+    GET /actors?filter={q: %Keanu Re%} //full text search on all text fields
+    GET /actors?sort=[firstName,DESC,birthDate,ASC] //sort by multiple fields in case of ties
 ```
 More Inspiration was drawn from languages like [FIQL/RSQL](https://github.com/jirutka/rsql-parser) so recently more features were added along with in-memory integration tests, support for non-number primary keys,  resulting in a total refactoring of the code and fix of a lot of bugs (there are still some edge cases).
 
 Now it is possible to also do the following (after url-encode of the query part of the url):
 ```
     GET /movies?filter={idNot: 1} //get movies with id not equal to 1
-    GET /actors?filter={movies: null} = //actors that have played in no movie
-    GET /actors?filter={moviesNot: null} = //actors that have played to a movie
-    GET /actors?filter={movies: [1,2]} = //actors played in either movie with id = 1, or movie with id = 2
-    GET /actors?filter={moviesAnd: [1,2]} = //actors played in both movies with id = 1 and id = 2
-    GET /actors?filter={moviesNot: [1,2]} = //actors played in neither movie with id = 1, nor movie with id = 2
-    GET /actors?filter={name: Keanu Ree%} // full text search on specific fields just by the inclusion of one or two '%' in the value
+    GET /actors?filter={movies: null} //actors that have played in no movie
+    GET /actors?filter={moviesNot: null} //actors that have played to a movie
+    GET /actors?filter={movies: [1,2]} //actors played in either movie with id = 1, or movie with id = 2
+    GET /actors?filter={moviesAnd: [1,2]} //actors played in both movies with id = 1 and id = 2
+    GET /actors?filter={moviesNot: [1,2]} //actors played in neither movie with id = 1, nor movie with id = 2
+    GET /actors?filter={name: Keanu Ree%} //full text search on specific fields just by the inclusion of one or two '%' in the value
 
-    GET /actors?filter={movies: {name: Matrix}} = //actors that have played in movie with name Matrix
-    GET /actors?filter={movies: {name: Matrix%}} = //actors that have played in movies with name starting with Matrix
-    GET /movies?filter={actors: {firstName: Keanu, lastNameNot: Reves}} = //movies with actors that firstName is 'Keanu' but lastName is not 'Reves'
+    GET /actors?filter={movies: {name: Matrix}} //actors that have played in movie with name Matrix
+    GET /actors?filter={movies: {name: Matrix%}} //actors that have played in movies with name starting with Matrix
+    GET /movies?filter={actors: {firstName: Keanu, lastNameNot: Reves}} //movies with actors that firstName is 'Keanu' but lastName is not 'Reves'
 
-    GET /actors?filter=[{firstName: Keanu},{firstName: John}] = //actors with firstName  'Keanu' or 'John'
-    GET /actors?filter={firstName: [Keanu, John]} = //equivalent to the above
+    GET /actors?filter=[{firstName: Keanu},{firstName: John}] //actors with firstName  'Keanu' or 'John'
+    GET /actors?filter={firstName: [Keanu, John]} //equivalent to the above
 
-    GET /documents?filter={uuid: f44010c9-4d3c-45b2-bb6b-6cac8572bb78} // get document with java.util.UUID equal to f44010c9-4d3c-45b2-bb6b-6cac8572bb78
-    GET /libraries?filter={documents: {uuid: f44010c9-4d3c-45b2-bb6b-6cac8572bb78}} // get libraries that contain document with uuid equal to f44010c9-4d3c-45b2-bb6b-6cac8572bb78
-    GET /libraries?filter={documents: f44010c9-4d3c-45b2-bb6b-6cac8572bb78} // same as above
+    GET /documents?filter={uuid: f44010c9-4d3c-45b2-bb6b-6cac8572bb78} //get document with java.util.UUID equal to f44010c9-4d3c-45b2-bb6b-6cac8572bb78
+    GET /libraries?filter={documents: {uuid: f44010c9-4d3c-45b2-bb6b-6cac8572bb78}} //get libraries that contain document with uuid equal to f44010c9-4d3c-45b2-bb6b-6cac8572bb78
+    GET /libraries?filter={documents: f44010c9-4d3c-45b2-bb6b-6cac8572bb78} //same as above
 ```
 The key names are not the ones on the database but the ones exposed by the REST API and are the names of the entity attribute names. Here `movies` is plural because an Actor has `@ManyToMany` annotation on `List<Movie> movies` attribute. 
 
@@ -127,6 +128,6 @@ spring-boot-rest-api-helpers.use-snake-case = false
 
 for more examples see/run the integration tests with `mvn -Dtest=filterByTests test`
 
-## Fully working example
+## Working Example
 
 For an example of how it can be used along with [admin-on-rest](https://marmelab.com/admin-on-rest) (a predecessor of [React Admin](https://marmelab.com/react-admin/)), see [admin-on-rest-demo-java-rest](https://github.com/jdevoo/admin-on-rest-demo-java-rest)

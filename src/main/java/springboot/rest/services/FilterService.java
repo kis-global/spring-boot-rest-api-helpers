@@ -8,6 +8,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import springboot.rest.entities.QueryParamWrapper;
 import springboot.rest.repositories.BaseRepository;
@@ -42,13 +43,13 @@ public class FilterService<T,I extends Serializable> {
 
             return repo.count(specifications.customSpecificationBuilder(map));
         } else if (filterOr != null && filterOr.length() > 0) {
-            List list = filterOr.toList();
-
-            if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
-                //map = convertToCamelCase(map); TODO for list
-            }
-
-            return repo.count(specifications.customSpecificationBuilder(list));
+            return repo.count((Specification<T>) (root, query, builder) -> {
+                List list = filterOr.toList();
+                if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
+                    //map = convertToCamelCase(map); TODO for list
+                }
+                return specifications.customSpecificationBuilder(builder, query, root, list);
+            });
         } else {
             return repo.count();
         }
@@ -70,6 +71,32 @@ public class FilterService<T,I extends Serializable> {
         return filterByHelper(repo, specifications, queryParamWrapper, "id", searchOnlyInFields);
     }
 
+    private List<Sort.Order> sortHelper(JSONArray sort, String primaryKeyName) {
+        List<Sort.Order> sortOrders = new ArrayList<>();
+        String usesSnakeCase = env.getProperty("spring-boot-rest-api-helpers.use-snake-case");
+
+        if (sort.length() % 2 != 0) {
+            throw new IllegalArgumentException("sort should have an even length given as array e.g ['name', 'ASC', 'birthDate', 'DESC']");
+        }
+
+        for (int i = 0; i < sort.length(); i = i + 2) {
+            String sortBy;
+            if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
+                sortBy = convertToCamelCase((String) sort.get(i));
+            } else {
+                sortBy = (String) sort.get(i);
+            }
+
+            sortOrders.add(new Sort.Order(Sort.Direction.valueOf((String) sort.get(i + 1)), sortBy));
+        }
+
+        if (sortOrders.isEmpty()) {
+            sortOrders.add(new Sort.Order(Sort.Direction.ASC, primaryKeyName));
+        }
+
+        return sortOrders;
+    }
+
     private <T> Page<T> filterByHelper(BaseRepository<T,I> repo,
                                        CustomSpecifications<T> specifications,
                                        QueryParamWrapper queryParamWrapper,
@@ -78,12 +105,11 @@ public class FilterService<T,I extends Serializable> {
         String usesSnakeCase = env.getProperty("spring-boot-rest-api-helpers.use-snake-case");
         String zeroBasedPageIndex = env.getProperty("spring-boot-rest-api-helpers.zero-based-page-index");
 
-        String sortBy = primaryKeyName;
-        String order = "DESC";
         JSONObject filter = queryParamWrapper.getFilter();
         JSONArray filterOr = queryParamWrapper.getFilterOr();
         JSONArray range = queryParamWrapper.getRange();
         JSONArray sort = queryParamWrapper.getSort();
+        Sort sortObj = Sort.by(sortHelper(sort, primaryKeyName));
 
         int page = 0;
         int size = Integer.MAX_VALUE;
@@ -96,44 +122,30 @@ public class FilterService<T,I extends Serializable> {
             }
         }
 
-        if (sort.length() == 2) {
-            if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
-                sortBy = convertToCamelCase((String) sort.get(0));
-            } else {
-                sortBy = (String) sort.get(0);
-            }
-            order = (String) sort.get(1);
-        }
-
-        Sort.Direction sortDir = Sort.Direction.DESC;
-        if (order.equalsIgnoreCase("ASC")) {
-            sortDir = Sort.Direction.ASC;
-        }
-
+        Page result;
         if (filter != null && filter.length() > 0) {
-            HashMap<String,Object> map = (HashMap<String,Object>) filter.toMap();
-
-            if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
-                map = convertToCamelCase(map);
-            }
-
-            return repo.findAll(specifications.customSpecificationBuilder(map, searchOnlyInFields),
-                    PageRequest.of(page, size, sortDir, sortBy));
+            result = repo.findAll((Specification<T>) (root, query, builder) -> {
+                HashMap<String,Object> map = (HashMap<String,Object>) filter.toMap();
+                if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
+                    map = convertToCamelCase(map);
+                }
+                return specifications.customSpecificationBuilder(builder, query, root, map, searchOnlyInFields);
+            }, PageRequest.of(page, size, sortObj));
         } else if (filterOr != null && filterOr.length() > 0) {
-            List list = filterOr.toList();
-
-            if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
-                //map = convertToCamelCase(map); TODO for list
-            }
-
-            return repo.findAll(specifications.customSpecificationBuilder(list),
-                    PageRequest.of(page, size, sortDir, sortBy));
+            result = repo.findAll((Specification<T>) (root, query, builder) -> {
+                List list = filterOr.toList();
+                if (usesSnakeCase != null && usesSnakeCase.equals("true")) {
+                    //map = convertToCamelCase(map); TODO for list
+                }
+                return specifications.customSpecificationBuilder(builder, query, root, list);
+            }, PageRequest.of(page, size, sortObj));
         } else {
-            return repo.findAll(PageRequest.of(page, size, sortDir, sortBy));
+            result = repo.findAll(PageRequest.of(page, size, sortObj));
         }
+        return result;
     }
 
-    private HashMap<String, Object> convertToCamelCase(HashMap<String, Object> snakeCaseMap) {
+    private HashMap<String, Object> convertToCamelCase(HashMap<String,Object> snakeCaseMap) {
         Set<String> keys = snakeCaseMap.keySet();
         HashMap<String, Object> camelCaseMap = new HashMap<>();
         for (String key: keys) {
