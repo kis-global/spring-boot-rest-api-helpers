@@ -36,6 +36,9 @@ public class BodyAdvice implements ResponseBodyAdvice {
     @Override
     @SuppressWarnings("unchecked")
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+        if (request.getURI().toString().contains("swagger-config")) {
+            return body;
+        }
         if (body == null) {
             throw new NotFoundException("Resource was not found!");
         }
