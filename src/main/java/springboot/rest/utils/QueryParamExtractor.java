@@ -1,13 +1,11 @@
 package springboot.rest.utils;
 
+import com.google.common.base.CaseFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import springboot.rest.entities.QueryParamWrapper;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 
 public class QueryParamExtractor {
 
@@ -16,16 +14,16 @@ public class QueryParamExtractor {
         if (StringUtils.isBlank(filterStr)) {
             filterStr = "{}";
         }
-
-        //https://stackoverflow.com/a/18368345
-        filterStr = filterStr.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
-        filterStr = filterStr.replaceAll("\\+", "%2B");
-        try {
-            //https://stackoverflow.com/a/6926987/986160
-            filterStr = URLDecoder.decode(filterStr.replace("+", "%2B"), "UTF-8")
-                    .replace("%2B", "+");
-        } catch (UnsupportedEncodingException e) {
-        }
+//
+//        //https://stackoverflow.com/a/18368345
+//        filterStr = filterStr.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+//        filterStr = filterStr.replaceAll("\\+", "%2B");
+//        try {
+//            //https://stackoverflow.com/a/6926987/986160
+//            filterStr = URLDecoder.decode(filterStr.replace("+", "%2B"), "UTF-8")
+//                    .replace("%2B", "+");
+//        } catch (UnsupportedEncodingException e) {
+//        }
 
         filterJsonOrArray = new JSONTokener(filterStr).nextValue();
         JSONObject filter = null;

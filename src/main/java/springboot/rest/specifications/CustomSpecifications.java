@@ -6,12 +6,22 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.Metamodel;
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class CustomSpecifications<T> {
@@ -244,9 +254,9 @@ public class CustomSpecifications<T> {
 
     private Predicate createLikePredicate(CriteriaBuilder builder, Root<T> root, Join join, Attribute a, String val) {
         if (join == null) {
-            return builder.like(root.get(a.getName()), val);
+            return builder.like(root.get(a.getName()).as(String.class), val);
         } else {
-            return builder.like(join.get(a.getName()), val);
+            return builder.like(join.get(a.getName()).as(String.class), val);
         }
     }
 

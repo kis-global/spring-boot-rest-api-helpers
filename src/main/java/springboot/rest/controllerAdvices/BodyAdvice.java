@@ -1,23 +1,24 @@
 package springboot.rest.controllerAdvices;
 
+import springboot.rest.exceptions.NotFoundException;
+
 import lombok.NonNull;
 import lombok.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import springboot.rest.exceptions.NotFoundException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Objects;
+import java.lang.reflect.Field;
 
 //https://stackoverflow.com/a/40333275/986160
 //https://stackoverflow.com/a/59294075/986160
@@ -35,9 +36,7 @@ public class BodyAdvice implements ResponseBodyAdvice {
     @Override
     @SuppressWarnings("unchecked")
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
-        if (Arrays.stream(Objects.requireNonNull(env.getProperty("spring-boot-rest-api-helpers.ignore-wrapper-url")).split(
-                ";"))
-                .anyMatch(u -> request.getURI().toString().contains(u))) {
+        if (request.getURI().toString().contains("swagger-config")) {
             return body;
         }
         if (body == null) {
