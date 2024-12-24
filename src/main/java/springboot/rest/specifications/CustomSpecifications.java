@@ -15,9 +15,12 @@ import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.Metamodel;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -262,7 +265,12 @@ public class CustomSpecifications<T> {
 
     private Predicate createGtPredicate(CriteriaBuilder builder, Root root, Attribute a, Object val) {
         if (val instanceof String) {
-            return builder.greaterThan(builder.lower(root.get(a.getName())), ((String) val).toLowerCase());
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return builder.greaterThan(root.get(a.getName()), formatter.parse(((String) val)));
+            } catch (ParseException ignored) {
+            }
+            return builder.greaterThan(root.get(a.getName()), ((String) val));
         } else if (val instanceof Integer) {
             return builder.greaterThan(root.get(a.getName()), (Integer) val);
         }
@@ -271,6 +279,11 @@ public class CustomSpecifications<T> {
 
     private Predicate createGtePredicate(CriteriaBuilder builder, Root root, Attribute a, Object val) {
         if (val instanceof String) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return builder.greaterThanOrEqualTo(root.get(a.getName()), formatter.parse(((String) val)));
+            } catch (ParseException ignored) {
+            }
             return builder.greaterThanOrEqualTo(builder.lower(root.get(a.getName())), ((String) val).toLowerCase());
         } else if (val instanceof Integer) {
             return builder.greaterThanOrEqualTo(root.get(a.getName()), (Integer) val);
@@ -280,6 +293,11 @@ public class CustomSpecifications<T> {
 
     private Predicate createLtPredicate(CriteriaBuilder builder, Root root, Attribute a, Object val) {
         if (val instanceof String) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return builder.lessThan(root.get(a.getName()), formatter.parse(((String) val)));
+            } catch (ParseException ignored) {
+            }
             return builder.lessThan(builder.lower(root.get(a.getName())), ((String) val).toLowerCase());
         } else if (val instanceof Integer) {
             return builder.lessThan(root.get(a.getName()), (Integer) val);
@@ -289,6 +307,11 @@ public class CustomSpecifications<T> {
 
     private Predicate createLtePredicate(CriteriaBuilder builder, Root root, Attribute a, Object val) {
         if (val instanceof String) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                return builder.lessThanOrEqualTo(root.get(a.getName()), formatter.parse(((String) val)));
+            } catch (ParseException ignored) {
+            }
             return builder.lessThanOrEqualTo(builder.lower(root.get(a.getName())), ((String) val).toLowerCase());
         } else if (val instanceof Integer) {
             return builder.lessThanOrEqualTo(root.get(a.getName()), (Integer) val);
