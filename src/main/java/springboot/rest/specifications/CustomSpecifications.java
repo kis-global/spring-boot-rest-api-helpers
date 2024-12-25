@@ -34,6 +34,11 @@ import java.util.UUID;
 @Service
 public class CustomSpecifications<T> {
 
+    private static final SimpleDateFormat FORMATTER_DT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat FORMATTER_D = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter FORMATTER_LD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter FORMATTER_LDT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @PersistenceContext
     private EntityManager em;
 
@@ -240,6 +245,8 @@ public class CustomSpecifications<T> {
                 } else {
                     return prepareJoinAssociatedPredicate(builder, root, a, val);
                 }
+            } else {
+                return invokePredicate(builder, root, a, val, null);
             }
         } else if (join != null) {
             if (isEnum(a)) {
@@ -264,22 +271,19 @@ public class CustomSpecifications<T> {
     }
 
     private Predicate invokePredicate(CriteriaBuilder builder, Root root, Attribute a, Object val, String methodName) {
-        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter formatterLD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter formatterLDT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         try {
             if (LocalDate.class.equals(a.getJavaType())) {
-                return invokePredicateMethod(methodName, builder, root, a, LocalDate.parse((String) val, formatterLD));
+                return invokePredicateMethod(methodName, builder, root, a, LocalDate.parse((String) val, FORMATTER_LD));
             } else if (Date.class.equals(a.getJavaType())) {
-                return invokePredicateMethod(methodName, builder, root, a, formatterDate.parse(((String) val)));
+                return invokePredicateMethod(methodName, builder, root, a, FORMATTER_DT.parse(((String) val)));
             } else if (LocalDateTime.class.equals(a.getJavaType())) {
-                return invokePredicateMethod(methodName, builder, root, a, LocalDateTime.parse((String) val, formatterLDT));
+                return invokePredicateMethod(methodName, builder, root, a, LocalDateTime.parse((String) val, FORMATTER_LDT));
             } else if (Timestamp.class.equals(a.getJavaType())) {
                 return invokePredicateMethod(methodName, builder, root, a, new Timestamp((Long) val));
             } else if (String.class.equals(a.getJavaType())) {
                 return invokePredicateMethod(methodName, builder, root, a, (String) val);
             } else if (val instanceof Integer) {
-                invokePredicateMethod(methodName, builder, root, a, (Integer) val);
+                return invokePredicateMethod(methodName, builder, root, a, (Integer) val);
             }
             throw new IllegalArgumentException("val type not supported yet for lower-equals");
         } catch (DateTimeParseException | ParseException e) {
@@ -294,15 +298,14 @@ public class CustomSpecifications<T> {
                                                                               Y value) {
         if ("greaterThanOrEqualTo".equals(methodName)) {
             return builder.greaterThanOrEqualTo(root.get(a.getName()), value);
-        }
-        if ("lessThan".equals(methodName)) {
+        } else if ("lessThan".equals(methodName)) {
             return builder.lessThan(root.get(a.getName()), value);
-        }
-        if ("lessThanOrEqualTo".equals(methodName)) {
+        } else if ("lessThanOrEqualTo".equals(methodName)) {
             return builder.lessThanOrEqualTo(root.get(a.getName()), value);
-        }
-        if ("greaterThan".equals(methodName)) {
+        } else if ("greaterThan".equals(methodName)) {
             return builder.greaterThan(root.get(a.getName()), value);
+        } else if (StringUtils.isEmpty(methodName)) {
+            return builder.equal(root.get(a.getName()), value);
         }
         throw new IllegalArgumentException();
     }
