@@ -6,30 +6,20 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.Metamodel;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CustomSpecifications<T> {
@@ -37,6 +27,7 @@ public class CustomSpecifications<T> {
     private static final SimpleDateFormat FORMATTER_DT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat FORMATTER_D = new SimpleDateFormat("yyyy-MM-dd");
     private static final DateTimeFormatter FORMATTER_LD = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter FORMATTER_LT = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter FORMATTER_LDT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @PersistenceContext
@@ -280,10 +271,18 @@ public class CustomSpecifications<T> {
                 return invokePredicateMethod(methodName, builder, root, a, LocalDateTime.parse((String) val, FORMATTER_LDT));
             } else if (Timestamp.class.equals(a.getJavaType())) {
                 return invokePredicateMethod(methodName, builder, root, a, new Timestamp((Long) val));
+            } else if (LocalTime.class.equals(a.getJavaType())) {
+                return invokePredicateMethod(methodName, builder, root, a, LocalTime.parse((String) val, FORMATTER_LT));
             } else if (String.class.equals(a.getJavaType())) {
                 return invokePredicateMethod(methodName, builder, root, a, (String) val);
-            } else if (val instanceof Integer) {
+            } else if (Integer.class.equals(a.getJavaType())) {
                 return invokePredicateMethod(methodName, builder, root, a, (Integer) val);
+            } else if (Long.class.equals(a.getJavaType())) {
+                return invokePredicateMethod(methodName, builder, root, a, (Long) val);
+            } else if (Boolean.class.equals(a.getJavaType())) {
+                return invokePredicateMethod(methodName, builder, root, a, (Boolean) val);
+            } else if (BigDecimal.class.equals(a.getJavaType())) {
+                return invokePredicateMethod(methodName, builder, root, a, (BigDecimal) val);
             }
             throw new IllegalArgumentException("val type not supported yet for lower-equals");
         } catch (DateTimeParseException | ParseException e) {
